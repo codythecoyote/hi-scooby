@@ -1,0 +1,74 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hi-scooby"
+version = "0.1.0"
+description = "Sequence- and RNA-conditioned chromatin contact-map inference."
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "alphagenome==0.6.1",
+  "alphagenome-research @ git+https://github.com/google-deepmind/alphagenome_research.git@455009019acd4c816873d648404ffef2d506606c",
+  "cooler==0.10.4",
+  "cooltools==0.7.1",
+  "huggingface_hub==1.17.0",
+  "jax==0.10.1",
+  "jaxlib==0.10.1",
+  "matplotlib==3.10.9",
+  "numpy==2.4.6",
+  "pandas==2.3.3",
+  "pyarrow==24.0.0",
+  "pyfaidx==0.9.0.4",
+  "PyYAML==6.0.3",
+  "scikit-learn==1.8.0",
+  "scipy==1.17.1",
+  "torch==2.10.0",
+  "tqdm==4.67.3",
+  "zarr==2.18.7",
+]
+
+[project.scripts]
+hi-scooby = "hi_scooby.cli:main"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = [
+  "src/hi_scooby",
+  "src/raw_contact_ranker",
+]
+exclude = [
+  "src/raw_contact_ranker/context_allocation.py",
+  "src/raw_contact_ranker/context_family_eb.py",
+  "src/raw_contact_ranker/exploratory_context.py",
+  "src/raw_contact_ranker/family_de_novo.py",
+  "src/raw_contact_ranker/family_eb_maps.py",
+]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/scoo-hic/__init__.py" = "hi_scooby/_legacy_source/__init__.py"
+"src/scoo-hic/model_v2.py" = "hi_scooby/_legacy_source/model_v2.py"
+"configs/resources.yaml" = "hi_scooby/configs/resources.yaml"
+"configs/sparse_10kb_calibration.yaml" = "hi_scooby/configs/sparse_10kb_calibration.yaml"
+"models/phase1_v2/best.pt" = "hi_scooby/models/phase1_v2/best.pt"
+"models/rna_scvi_14" = "hi_scooby/models/rna_scvi_14"
+"models/sparse_10kb_v1/best.pt" = "hi_scooby/models/sparse_10kb_v1/best.pt"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/README.md",
+  "/configs",
+  "/environment.yml",
+  "/environment-rna.yml",
+  "/models",
+  "/scripts",
+  "/src",
+]
+exclude = [
+  "/docs",
+  "/jobs",
+  "/tests",
+]

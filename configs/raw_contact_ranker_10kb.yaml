@@ -1,0 +1,134 @@
+schema_version: 3
+seed: 20260724
+bin_size_bp: 10000
+minimum_distance_bp: 250000
+maximum_distance_bp: 990000
+maximum_distance_bp_exclusive: 1000000
+distance_bands:
+  - id: 250-500
+    minimum_bp_inclusive: 250000
+    maximum_bp_exclusive: 500000
+  - id: 500-1000
+    minimum_bp_inclusive: 500000
+    maximum_bp_exclusive: 1000000
+primary_pseudoreplicate_split: 0
+pseudoreplicate_splits: 20
+strict_stop_conditions: true
+
+paths:
+  source_tiles: data/processed/multiome/tiles.parquet
+  source_cooler: data/processed/multiome_rna/hic_coolers/all_cells.5kb.cool
+  tiles: data/processed/raw_contact_ranker_10kb_inputs/tiles.10kb.parquet
+  cooler: data/processed/raw_contact_ranker_10kb_inputs/all_cells.10kb.cool
+  filtered_pairs: data/processed/phase1_hic/filtered_pairs
+  membership: data/processed/multiome_rna/phase1_membership.parquet
+  contexts: data/processed/multiome_rna/target_contexts.parquet
+  centroids: data/processed/multiome/train_in/rna_scvi_14_cell_type_centroids.parquet
+  gene_annotation: data/external/mm10_genome/gencode.vM25.annotation.gtf.gz
+  ccre_registry: data/external/mm10_regulatory/ENCFF167FJQ.mm10.ccre.bed.gz
+  fasta: data/external/mm10_genome/mm10.fa
+  mappability: data/external/mm10_mappability/k100.umap.bedgraph.gz
+  embeddings: data/external/mm10_embeddings
+  embedding_manifest: data/external/mm10_embeddings/window_manifest.mm10.parquet
+  reference_topk: results/other_experiments/topk_results_5kb.json
+
+outputs:
+  data_root: data/processed/raw_contact_ranker_10kb_v1
+  results_root: results/raw_contact_ranker_10kb_v1
+
+annotations:
+  mappability_name: Umap multi-read mm10 k100
+  mappability_url: https://bismap.hoffmanlab.org/raw/mm10/k100.umap.bedgraph.gz
+  gene_annotation_name: GENCODE vM25
+  gene_annotation_sha256: e6c9704cb5832b8a1c71431ecac9ea30057377c72cdc9a12dc5d0405ab066d5a
+  ccre_registry_accession: ENCFF167FJQ
+  ccre_registry_url: https://www.encodeproject.org/files/ENCFF167FJQ/@@download/ENCFF167FJQ.bed.gz
+  ccre_registry_md5: e054b7a2a0c572d060ccb851b7a294fc
+  ctcf_pwm_id: JASPAR_MA0139.1
+  ctcf_score_threshold: 15.0
+  primary_restriction_motif: GTAC
+  secondary_restriction_motif: CATG
+  minimum_valid_sequence_fraction: 0.95
+  minimum_mappability: 0.001
+  exposure_floor: 0.000001
+  exposure_ceiling: 1000000.0
+
+features:
+  pair_channels: 128
+  native_bin_size_bp: 2048
+  native_bins: 512
+  chunk_pairs: 16384
+
+power:
+  primary_top_fraction: 0.01
+  diagnostic_top_fractions: [0.02, 0.05]
+  minimum_evaluable_k_fraction: 0.80
+  minimum_validation_chromosomes: 10
+  minimum_ceiling_enrichment: 2.0
+  bootstrap_replicates: 1000
+  confidence_level: 0.975
+  tie_mode: positive_fractional
+
+model:
+  objective: exact_local_rate
+  feature_set: combined
+  hidden_dim: 128
+  context_programs: 8
+  context_dim: 14
+  dropout: 0.1
+  lambda_rank: 0.0
+  rna_l2: 0.01
+  learning_rate: 0.0003
+  weight_decay: 0.000001
+  batch_size: 65536
+  epochs: 8
+  promotion_epochs: 3
+  chromosome_folds: 5
+  confirmation_seeds: 3
+  preload_features: true
+  progress_updates_per_epoch: 200
+  early_stopping_patience: 2
+  early_stopping_min_delta: 0.0001
+
+calibration:
+  reference_depth: 1000000
+  distribution: nb2
+  intercept_shrinkage_sd: 2.0
+  observed_predicted_ratio: [0.90, 1.10]
+  calibration_slope: [0.80, 1.20]
+  interval_probability: 0.95
+
+contexts:
+  fdr: 0.05
+  pools:
+    - id: L23_IT
+      members: [L23IT-1, L23IT-2, L23IT-3]
+    - id: cortical_IT
+      members: [L23IT-1, L23IT-2, L23IT-3, L45IT, L5IT, L6IT]
+    - id: corticofugal
+      members: [L5ET, L6CT, PT]
+    - id: interneuron
+      members: [Pvalb, Sst, Vip]
+    - id: oligodendroglial
+      members: [OPC, Oligo]
+  unpooled_shared_fallback:
+    [Astrocyte, Endothelial, L56NP, L6b, MGL, Subiculum]
+
+evaluation:
+  top_fractions: [0.01, 0.02, 0.05]
+  match_tolerances_bins: [0, 1]
+  exact_distances_bp: [250000, 500000, 750000]
+  bootstrap_replicates: 1000
+  confidence_level: 0.975
+  minimum_candidates: 100
+  minimum_supported_candidates: 20
+  minimum_supported_context_fraction: 0.5
+  required_anchor_strata:
+    [anchor_has_promoter, anchor_has_ccre, anchor_has_ctcf]
+  descriptive_anchor_strata:
+    [anchor_ctcf_convergent, anchor_ctcf_divergent]
+  primary_tie_mode: positive_fractional
+  require_complete_acceptance_evidence: true
+  minimum_top1_enrichment: 2.0
+  minimum_ceiling_excess_fraction: 0.50
+  minimum_reliability_fraction: 0.20

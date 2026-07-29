@@ -1,0 +1,27 @@
+schema_version: 1
+model_status: diagnostic
+formal_gate_passed: false
+calibration_passed_provisionally: true
+
+distribution: nb2
+reference_depth: 1000000
+interval_probability: 0.95
+variance: mu + dispersion * mu^2
+
+distance_bands:
+  250-500:
+    minimum_bp_inclusive: 250000
+    maximum_bp_exclusive: 500000
+    calibration_intercept: -13.420971051971268
+    dispersion: 0.4524391593490399
+
+  500-1000:
+    minimum_bp_inclusive: 500000
+    maximum_bp_exclusive: 1000000
+    calibration_intercept: -13.373284090369982
+    dispersion: 0.8587015400335214
+
+limitations:
+  - The checkpoint was selected using performance within one chromosome fold.
+  - The later exact 750 kb confirmation condition did not pass.
+  - Outputs must be labeled diagnostic rather than validated or promoted.

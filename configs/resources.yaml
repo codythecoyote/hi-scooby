@@ -1,0 +1,135 @@
+schema_version: 1
+
+alphagenome:
+  model_version: all_folds
+  huggingface_repo: google/alphagenome-all-folds
+  revision: a8f293a76ee73d5b57f3bf2ae146510589fcf187
+  organism: mus_musculus
+  organism_index: 1
+  embedding_key: embeddings_pair
+  embedding_shape: [512, 512, 128]
+  sequence_length_bp: 1048576
+
+resources:
+  phase1_v2_checkpoint:
+    kind: model
+    release_path: models/phase1_v2/best.pt
+    source_path: results/phase1_model_v2/best.pt
+    bytes: 1291467
+    required_for: [smooth]
+
+  sparse_10kb_checkpoint:
+    kind: model
+    release_path: models/sparse_10kb_v1/best.pt
+    source_path: results/raw_contact_ranker_10kb_v1/shared_topology/cv/alphagenome/fold_0/best.pt
+    bytes: 838726
+    status: diagnostic
+    required_for: [sparse]
+
+  rna_ablation_checkpoint:
+    kind: model
+    release_path: models/legacy_ablations/rna_deranged_v1.pt
+    source_path: results/rna_ablation/best.pt
+    bytes: 838413
+    status: legacy
+    required_for: [rna_deranged_v1]
+
+  sequence_ablation_checkpoint:
+    kind: model
+    release_path: models/legacy_ablations/sequence_only_v1.pt
+    source_path: results/sequence_ablation/best.pt
+    bytes: 13541
+    status: legacy
+    required_for: [sequence_only_v1]
+
+  rna_scvi_14_model:
+    kind: model_directory
+    release_path: models/rna_scvi_14
+    status: accepted
+    build_source: data/processed/multiome/multivi_input.h5ad
+    required_for: [smooth, rna_deranged_v1]
+
+  rna_scvi_training_anndata:
+    kind: training_input
+    path: data/processed/multiome/multivi_input.h5ad
+    bytes: 15693601
+    required_for: [train_rna_encoder]
+
+  rna_scvi_reference_centroids:
+    kind: model_metadata
+    path: data/processed/multiome/train_in/rna_scvi_14_cell_type_centroids.parquet
+    bytes: 4295
+    required_for: [smooth, train_phase1_v2]
+
+  mm10_fasta:
+    kind: reference
+    path: data/external/mm10_genome/mm10.fa
+    bytes: 2785490220
+    required_for: [smooth, sparse, training]
+
+  mm10_fasta_index:
+    kind: reference
+    path: data/external/mm10_genome/mm10.fa.fai
+    bytes: 2511
+    required_for: [smooth, sparse, training]
+
+  alphagenome_window_manifest:
+    kind: geometry
+    path: data/external/mm10_embeddings/window_manifest.mm10.parquet
+    bytes: 113054
+    required_for: [smooth, sparse, training]
+
+  phase1_tiles:
+    kind: geometry
+    path: data/processed/multiome/tiles.parquet
+    bytes: 115544
+    required_for: [smooth, training]
+
+  sparse_tiles:
+    kind: geometry
+    path: data/processed/raw_contact_ranker_10kb_inputs/tiles.10kb.parquet
+    bytes: 56993
+    required_for: [sparse, train_sparse]
+
+  sparse_canonical_pairs:
+    kind: geometry
+    path: data/processed/raw_contact_ranker_10kb_v1/canonical_pairs.parquet
+    bytes: 103702954
+    required_for: [sparse, train_sparse]
+
+  sparse_distance_offsets:
+    kind: calibration
+    path: data/processed/raw_contact_ranker_10kb_v1/distance_offset_curve.parquet
+    bytes: 6964
+    required_for: [sparse, train_sparse]
+
+  sparse_calibration:
+    kind: calibration
+    release_path: configs/sparse_10kb_calibration.yaml
+    bytes: 780
+    status: diagnostic
+    required_for: [sparse]
+
+  phase1_membership:
+    kind: training_input
+    path: data/processed/multiome_rna/phase1_membership.parquet
+    bytes: 152100
+    required_for: [build_phase1_targets]
+
+  phase1_target_contexts:
+    kind: training_input
+    path: data/processed/multiome_rna/target_contexts.parquet
+    bytes: 3377
+    required_for: [smooth, build_phase1_targets, train_phase1_v2]
+
+  phase1_targets:
+    kind: training_target
+    path: data/processed/multiome_rna/hic_targets.zarr
+    status: rebuild_required
+    required_for: [train_phase1_v2, train_legacy_ablations]
+
+  peakachu_hicar_10m_10kb:
+    kind: validation_model
+    path: data/external/peakachu_models/HiCAR-peakachu-pretrained.10million.10kb.pkl
+    bytes: 4951536
+    required_for: [validate_peakachu]

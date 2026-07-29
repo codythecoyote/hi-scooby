@@ -1,0 +1,6 @@
+root_paths:
+  repo_root: .
+  data_root: data
+
+mm10:
+  embeddings: external/mm10_embeddings
