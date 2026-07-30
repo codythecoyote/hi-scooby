@@ -510,6 +510,9 @@ def run_inference(
     sparse_tiles = sparse_tiles.iloc[:selected_tile_count].reset_index(
         drop=True
     )
+    row_indices = np.arange(selected_tile_count, dtype=np.int64)
+    phase1_tiles["tile_index"] = row_indices
+    sparse_tiles["tile_index"] = row_indices
     output_tiles = build_output_tile_table(
         phase1_tiles,
         sparse_tiles,
