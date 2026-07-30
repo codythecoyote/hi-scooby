@@ -9,6 +9,7 @@ description = "Sequence- and RNA-conditioned chromatin contact-map inference."
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
 dependencies = [
+  "aiohttp==3.13.5",
   "alphagenome==0.6.1",
   "alphagenome-research @ git+https://github.com/google-deepmind/alphagenome_research.git@455009019acd4c816873d648404ffef2d506606c",
   "cooler==0.10.4",
